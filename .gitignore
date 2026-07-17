@@ -1,0 +1,13 @@
+# Fichiers et dossiers à ignorer par Git
+__pycache__/
+*.pyc
+.env
+venv/
+.venv/
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+models/*.pkl
+models/*.h5
+models/*.onnx
