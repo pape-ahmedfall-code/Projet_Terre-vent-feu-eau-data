@@ -11,3 +11,8 @@ data/processed/*
 models/*.pkl
 models/*.h5
 models/*.onnx
+.venv/ 
+.venv_shap/ 
+.vscode/ 
+data/ 
+models/ 
