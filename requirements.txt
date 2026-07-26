@@ -164,8 +164,8 @@ threadpoolctl==3.6.0
 tifffile==2026.7.14
 toml==0.10.2
 tomlkit==0.15.1
-torch==2.13.0+cpu
-torchvision==0.28.0+cpu
+torch
+torchvision
 tornado==6.5.7
 tqdm==4.69.0
 traitlets==5.15.1
