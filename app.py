@@ -167,7 +167,7 @@ else:
             
             with res_col2:
                 st.write(f"**Seuil de décision métier** : {THRESHOLD}")
-                st.write(f"**Statut** : {'Alerte Activée' if is_fire else 'Pas d\'alerte'}")
+                st.write(f"**Statut** : {'Alerte Activée' if is_fire else 'Pas d alerte'}")
 
             # Calcul SHAP Local pour l'explication en direct
             st.markdown("---")

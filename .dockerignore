@@ -1,0 +1,28 @@
+# Tous les environnements virtuels
+.venv
+.venv_shap
+venv
+ENV
+env
+
+# Dossier de données ultra lourd (25 Go+)
+data
+data/
+data/*
+
+# Notebooks et exports
+notebook
+notebook/
+*.ipynb
+
+# Cache Python et tests
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+
+# IDE et Git
+.vscode
+.git
+.gitignore
