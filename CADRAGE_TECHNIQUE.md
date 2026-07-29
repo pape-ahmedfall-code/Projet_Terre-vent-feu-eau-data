@@ -3,7 +3,7 @@
 
 ---
 
-## 1. Contexte Stratégique & Analyse du Besoin Métier (RNCP C10, C14, C15)
+## 1. Contexte Stratégique & Analyse du Besoin Métier 
 
 Face à l'intensification du dérèglement climatique, la **Direction Générale de la Sécurité Civile et de la Gestion des Crises (DGSCGC)** nécessite un outil d'anticipation du risque d'incendie de forêt à l'échelle communale. 
 
@@ -16,7 +16,7 @@ L'objectif principal est de passer d'une logique de réaction post-déclaration 
 
 ---
 
-## 2. Architecture du Système d'Information & Cartographie des Flux (RNCP C4, C21, C22)
+## 2. Architecture du Système d'Information & Cartographie des Flux 
 
 Le pipeline d'ingénierie suit un flux de données strict pour garantir la séparation des responsabilités et éviter le *data leakage*.
 
@@ -30,14 +30,14 @@ Le pipeline d'ingénierie suit un flux de données strict pour garantir la sépa
 
 ---
 
-### Cartographie du SI et Matrice des Flux (RNCP C4)
+### Cartographie du SI et Matrice des Flux 
 1. **Ingestion & Data Lake** : Chargement des fichiers Parquet/CSV via **DuckDB** pour des jointures SQL massives (69M+ de lignes) sur la clé composite `(code_insee, date)`.
 2. **Feature Store / Processing** : Calcul des variables cycliques, des fenêtres glissantes (lags) et de l'attribution des clusters HDBSCAN.
 3. **MLOps Core** : Suivi des artefacts par **DVC**, versionnage de code par **Git**, et conteneurisation légère sous **Docker**.
 
 ---
 
-## 3. Matrice de Risques Projet & Mitigation (RNCP C17)
+## 3. Matrice de Risques Projet & Mitigation
 
 | Risque Identifié | Impact | Probabilité | Stratégie de Mitigation |
 | :--- | :---: | :---: | :--- |
@@ -48,7 +48,7 @@ Le pipeline d'ingénierie suit un flux de données strict pour garantir la sépa
 
 ---
 
-## 4. Choix de Modélisation & Architecture ML/DL (RNCP C29, C31, C32)
+## 4. Choix de Modélisation & Architecture ML/DL 
 
 ### A. Clustering Spatial (Contagion Géographique)
 Un algorithme **HDBSCAN** (métrique Haversine sur coordonnées en radians) est exécuté sur les centroïdes des communes (`latitude_centre`, `longitude_centre`).
@@ -63,7 +63,7 @@ Pour capturer les interactions complexes et non-linéaires entre la météo et l
 
 ---
 
-## 5. Résultats & Évaluation des Performances (RNCP C26, C29)
+## 5. Résultats & Évaluation des Performances 
 
 Compte tenu de la rareté des départs de feu par rapport aux journées sans feu, l'Accuracy globale est rejetée au profit des métriques axées sur la classe minoritaire.
 
@@ -75,7 +75,7 @@ Compte tenu de la rareté des départs de feu par rapport aux journées sans feu
 
 ---
 
-## 6. Explicabilité Métier avec SHAP (RNCP C32)
+## 6. Explicabilité Métier avec SHAP 
 
 L'intégration de la bibliothèque **SHAP (SHapley Additive exPlanations)** au sein du frontend Streamlit permet d'expliquer chaque prédiction individuelle :
 * **Facteurs Aggravants Principaux** : Vent moyen (`f_wind_mean`), vitesse des rafales, et lags de sécheresse à 30 jours.
@@ -83,8 +83,8 @@ L'intégration de la bibliothèque **SHAP (SHapley Additive exPlanations)** au s
 
 ---
 
-## 7. Éco-Conception & Ingestion Sécurisée (RNCP C23, C25, C27, C30)
+## 7. Éco-Conception & Ingestion Sécurisée 
 
-* **Éco-conception (C23)** : Ingestion SQL optimisée par **DuckDB** réduisant la consommation de mémoire RAM (traitement par blocs). Image Docker optimisée à l'aide d'un `.dockerignore` strict (<1MB de contexte de build).
-* **Versionnage DVC (C30)** : Découplage complet entre le code source (Git) et les 25 Go de données brutes/modèles (`data.dvc`, `models.dvc`).
-* **Qualité & CI/CD (C27)** : Exécution automatisée des tests unitaires (`pytest`) via **GitHub Actions** à chaque *push*.
+* **Éco-conception** : Ingestion SQL optimisée par **DuckDB** réduisant la consommation de mémoire RAM (traitement par blocs). Image Docker optimisée à l'aide d'un `.dockerignore` strict (<1MB de contexte de build).
+* **Versionnage DVC** : Découplage complet entre le code source (Git) et les 25 Go de données brutes/modèles (`data.dvc`, `models.dvc`).
+* **Qualité & CI/CD** : Exécution automatisée des tests unitaires (`pytest`) via **GitHub Actions** à chaque *push*.
