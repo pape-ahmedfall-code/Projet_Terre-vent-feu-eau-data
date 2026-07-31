@@ -1,28 +1,35 @@
 # Tous les environnements virtuels
-.venv
-.venv_shap
-venv
+.venv*
+venv*
 ENV
 env
 
-# Dossier de données ultra lourd (25 Go+)
-data
+# Dossiers de données lourds
 data/
 data/*
+*.csv
+*.parquet
+*.zip
+*.tar
+*.gz
+*.7z
+*.json
+!models/model_metadata.json
 
 # Notebooks et exports
-notebook
 notebook/
 *.ipynb
+.ipynb_checkpoints
 
 # Cache Python et tests
-__pycache__
+__pycache__/
 *.pyc
 *.pyo
 *.pyd
-.pytest_cache
+.pytest_cache/
 
 # IDE et Git
-.vscode
-.git
+.vscode/
+.git/
 .gitignore
+README.md
