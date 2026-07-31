@@ -1,35 +1,11 @@
-# Tous les environnements virtuels
-.venv*
-venv*
-ENV
-env
+# Ignorer TOUT par défaut
+*
 
-# Dossiers de données lourds
-data/
-data/*
-*.csv
-*.parquet
-*.zip
-*.tar
-*.gz
-*.7z
-*.json
-!models/model_metadata.json
-
-# Notebooks et exports
-notebook/
-*.ipynb
-.ipynb_checkpoints
-
-# Cache Python et tests
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.pytest_cache/
-
-# IDE et Git
-.vscode/
-.git/
-.gitignore
-README.md
+# Autoriser EXCLUSIVEMENT les éléments nécessaires à l'application
+!app.py
+!requirements.txt
+!Dockerfile
+!models/
+!models/**
+!tests/
+!tests/**
