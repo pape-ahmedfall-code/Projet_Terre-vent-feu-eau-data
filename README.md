@@ -9,7 +9,7 @@
 
 ## 📌 Présentation du Projet
 
-Cette plateforme MLOps de bout en bout anticipe et évalue le risque d'incendie de forêt à l'échelle communale en France. Développée dans le cadre de la certification **RNCP 40573**, elle croise plus de 50 ans d'historiques d'incendies issus de la base **BDIFF (1973–2024)** avec les données météorologiques quotidiennes **SIM2/MétéoNet** et le référentiel géographique des communes de l'INSEE.
+Cette plateforme MLOps de bout en bout anticipe et évalue le risque d'incendie de forêt à l'échelle communale en France. Elle croise plus de 50 ans d'historiques d'incendies issus de la base **BDIFF (1973–2024)** avec les données météorologiques quotidiennes **SIM2/MétéoNet** et le référentiel géographique des communes de l'INSEE.
 
 Le système s'appuie sur un réseau de neurones (MLP) à 3 couches ($53 \rightarrow 102 \rightarrow 126$) entraîné sous PyTorch avec Focal Loss, une explicabilité SHAP intégrée et une application web interactive Streamlit conteneurisée via Docker.
 
