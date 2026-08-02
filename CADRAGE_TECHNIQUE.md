@@ -1,5 +1,5 @@
 # Note de Cadrage Technique & MLOps — Plateforme de Prédiction du Risque d'Incendie
-**Référentiel RNCP 40573 — Alignment Datasets, Machine Learning & Architecture SI**
+**Référentiel RNCP 40573 — Alignement Datasets, Machine Learning & Architecture SI**
 
 ---
 
@@ -11,7 +11,7 @@ L'objectif principal est de passer d'une logique de réaction post-déclaration 
 
 ### Objectifs Clés
 * **Consolidation multi-sources** : Harmonisation des historiques d'incendies (BDIFF) et des données météorologiques historiques (SIM2/MétéoNet).
-* **Modélisation non-linéaire** : Prédiction de la probabilité d'occurrence d'incendie ($Target \in \{0, 1\}$) sur l'ensemble du territoire français.
+* **Modélisation non-linéaire** : Prédiction de la probabilité d'occurrence d'incendie sur l'ensemble du territoire français.
 * **Explicabilité métier** : Fournir aux décideurs opérationnels les facteurs de risque dominants (vent, humidité, sécheresse cumulée) via l'approche SHAP.
 
 ---
@@ -21,11 +21,10 @@ L'objectif principal est de passer d'une logique de réaction post-déclaration 
 Le pipeline d'ingénierie suit un flux de données strict pour garantir la séparation des responsabilités et éviter le *data leakage*.
 
 [BDIFF (CSV)] --------┐
-├──> [Ingestion DuckDB] ──> [Negative Sampling & Feature Eng.] ──> [HDBSCAN Spatial]
+                      ├──> [Ingestion DuckDB] ──> [Negative Sampling & Feature Eng.] ──> [HDBSCAN Spatial]
 [Météo SIM2 (Parquet)] ┘                                         
----
-                           │
-▼
+                                                                 │
+                                                                 ▼
 [Streamlit Frontend] <── [Inférence PyTorch + SHAP] <── [Modèle Entraîné (MLP)] <── [Optuna Tuning & Split Temporel]
 
 ---
@@ -42,9 +41,9 @@ Le pipeline d'ingénierie suit un flux de données strict pour garantir la sépa
 | Risque Identifié | Impact | Probabilité | Stratégie de Mitigation |
 | :--- | :---: | :---: | :--- |
 | **Data Leakage Temporel** | Majeur | Forte | Strict split chronologique (Train: 2006–2021, Test: 2022–2024). Interdiction du K-Fold classique. |
-| **Déséquilibre de Classe Extreme** | Majeur | Forte | Utilisation d'une fonction de perte **Focal Loss** et évaluation prioritaire sur **AUPRC / Rappel**. |
+| **Déséquilibre de Classe Extrême** | Majeur | Forte | Utilisation d'une fonction de perte **Focal Loss** et fixation du seuil de décision métier à **0,5000**. |
 | **Biais d'Interpolation Météo** | Moyen | Moyenne | Attribution spatiale par métrique Haversine / Plus Proche Voisin par rapport au centroïde INSEE. |
-| **Dérive du Modèle (Data Drift)** | Moyen | Moyenne | MLOps avec suivi DVC des datasets bruts et ré-entraînement versionné. |
+| **Dérive du Modèle (Data Drift)** | Moyen | Moyenne | MLOps avec suivi DVC des datasets bruts/modèles et tests automatisés sur les schémas d'entrée. |
 
 ---
 
@@ -57,25 +56,13 @@ Un algorithme **HDBSCAN** (métrique Haversine sur coordonnées en radians) est 
 
 ### B. Architecture Neural Network (PyTorch MLP)
 Pour capturer les interactions complexes et non-linéaires entre la météo et la saisonnalité :
-* **Réseau** : Perceptron Multicouche (MLP) avec couches de `Linear`, `BatchNorm1d`, `ReLU` et `Dropout`.
-* **Perte** : **Focal Loss** pour pénaliser fortement les erreurs sur les exemples rares (feux positifs) sans sur-échantillonnage artificiel.
-* **Hypertuning** : Recherche automatisée des hyperparamètres (*learning rate*, *dropout*, taille des couches) via **Optuna**.
+* **Réseau** : Perceptron Multicouche (MLP) à 3 couches cachées avec **53 nœuds en entrée**, des couches cachées de **102 et 126 nœuds**, activation **Sigmoid** finale, et un taux de **Dropout de 0,337**.
+* **Perte & Seuil** : **Focal Loss** pour pénaliser les erreurs sur la classe minoritaire et seuil de décision fixe réglé à **0,5000**.
+* **Hypertuning & Métadonnées** : Recherche d'hyperparamètres via **Optuna** avec export dynamique des configurations dans `model_metadata.json`.
 
 ---
 
-## 5. Résultats & Évaluation des Performances 
-
-Compte tenu de la rareté des départs de feu par rapport aux journées sans feu, l'Accuracy globale est rejetée au profit des métriques axées sur la classe minoritaire.
-
-| Métrique | Valeur Observée | Interprétation Métier |
-| :--- | :---: | :--- |
-| **Rappel (Recall - Classe Feu)** | **~0.82** | Capture de 82% des départs de feux réels (minimisation des faux négatifs). |
-| **Précision (Classe Feu)** | **~0.35** | Niveau contrôlé de fausses alertes opérationnelles. |
-| **AUPRC** | **~0.48** | Performance solide sur la courbe Précision-Rappel en contexte déséquilibré. |
-
----
-
-## 6. Explicabilité Métier avec SHAP 
+## 5. Explicabilité Métier avec SHAP 
 
 L'intégration de la bibliothèque **SHAP (SHapley Additive exPlanations)** au sein du frontend Streamlit permet d'expliquer chaque prédiction individuelle :
 * **Facteurs Aggravants Principaux** : Vent moyen (`f_wind_mean`), vitesse des rafales, et lags de sécheresse à 30 jours.
@@ -83,8 +70,8 @@ L'intégration de la bibliothèque **SHAP (SHapley Additive exPlanations)** au s
 
 ---
 
-## 7. Éco-Conception & Ingestion Sécurisée 
+## 6. Éco-Conception & Ingestion Sécurisée 
 
-* **Éco-conception** : Ingestion SQL optimisée par **DuckDB** réduisant la consommation de mémoire RAM (traitement par blocs). Image Docker optimisée à l'aide d'un `.dockerignore` strict (<1MB de contexte de build).
-* **Versionnage DVC** : Découplage complet entre le code source (Git) et les 25 Go de données brutes/modèles (`data.dvc`, `models.dvc`).
-* **Qualité & CI/CD** : Exécution automatisée des tests unitaires (`pytest`) via **GitHub Actions** à chaque *push*.
+* **Éco-conception** : Ingestion SQL optimisée par **DuckDB** réduisant la consommation de mémoire RAM (traitement par blocs). Image Docker optimisée via PyTorch CPU (`--extra-index-url`) et un `.dockerignore` strict en liste blanche (**119 ko de contexte de build**).
+* **Versionnage DVC** : Découplage complet entre le code source (Git) et les volumes de données/artefacts (`data.dvc`, `models.dvc`).
+* **Qualité & CI/CD** : Exécution automatisée des tests unitaires (`pytest`) via **GitHub Actions** pour vérifier la cohérence des dimensions et du pipeline à chaque *push*.
